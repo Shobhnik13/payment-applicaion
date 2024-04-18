@@ -60,6 +60,7 @@ router.put("/", authMiddleware, async (req, res) => {
             message: "Error while updating information"
         })
     }
+    
 
     await User.updateOne({ id: req.userId }, req.body)
 
