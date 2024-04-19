@@ -2,7 +2,7 @@ const express=require('express')
 const router=express.Router()
 const signUpBody=require('../zod schemas/SignupBody')
 const updateBody=require('../zod schemas/UpdateBody')
-const { User } = require('../db')
+const { User, Accounts } = require('../db')
 const jwt=require('jsonwebtoken')
 const { secret } = require("../config");
 const { authMiddleware } = require('../middleware')
@@ -23,6 +23,15 @@ router.post('/signup',async(req,res)=>{
         })
     }
     const dbUser=await User.create(body)
+    const userId=dbUser._id
+    //after creating the user successfully 
+    // now create an account for the new signup user with a dummy balance amount
+    const newAccount= await Accounts.create({
+        userId,
+        balance:1 + Math.random()*10000
+    })
+    //account created successfully
+    //now return the new signed up user a token based on his userId
     const token=jwt.sign({
         userId:dbUser._id,
     },secret)
@@ -60,7 +69,7 @@ router.put("/", authMiddleware, async (req, res) => {
             message: "Error while updating information"
         })
     }
-    
+
 
     await User.updateOne({ id: req.userId }, req.body)
 
